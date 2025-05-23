@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compaction Ratio Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem; /* 12px */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1rem; 
+        }
+        .input-label {
+            font-size: 0.875rem; 
+            font-weight: 500;
+            color: #374151; 
+        }
+        .input-field {
+            width: 100%;
+            padding: 0.75rem; 
+            border: 1px solid #D1D5DB; 
+            border-radius: 0.375rem; 
+            margin-top: 0.25rem; 
+            box-shadow: inset 0 1px 2px 0 rgba(0,0,0,0.05);
+        }
+        .input-field:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            border-color: #6366F1; 
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.3); 
+        }
+        .btn-primary {
+            background-color: #4F46E5; 
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem; 
+            border-radius: 0.375rem; 
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #4338CA; 
+        }
+        .btn-secondary {
+            background-color: #E5E7EB; 
+            color: #374151; 
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s;
+        }
+        .btn-secondary:hover {
+            background-color: #D1D5DB; 
+        }
+        .results-container { 
+            margin-top: 1rem; 
+            background-color: #F9FAFB; 
+            border-radius: 0.5rem; 
+            padding: 1rem; 
+            border: 1px solid #E5E7EB; 
+        }
+        .results-container .result-title { 
+            font-size: 1.125rem; 
+            font-weight: 600;
+            color: #1F2937; 
+            margin-bottom: 0.75rem; 
+            text-align: center;
+        }
+        .result-item-card {
+            background-color: white;
+            padding: 0.75rem; 
+            border-radius: 0.5rem; 
+            margin-bottom: 0.75rem; 
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.07), 0 1px 2px 0 rgba(0,0,0,0.03);
+            border: 1px solid #E5E7EB; 
+        }
+        .result-item-card.single-item {
+             display: flex;
+            flex-direction: column; 
+            align-items: center;   
+            text-align: center;   
+        }
+
+        .result-item-card.split-card { 
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around; 
+            align-items: stretch; 
+        }
+        .split-card-section {
+            width: 48%; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 0.25rem; 
+        }
+        .split-card-section:first-child {
+            border-right: 1px solid #E5E7EB; 
+            padding-right: 0.75rem; 
+        }
+        .split-card-section:last-child {
+            padding-left: 0.75rem; 
+        }
+
+
+        .result-item-card:last-child {
+            margin-bottom: 0;
+        }
+        .result-item-icon {
+            flex-shrink: 0;
+            margin-bottom: 0.25rem; 
+            color: #4F46E5; 
+        }
+        .result-item-icon svg {
+            width: 1.5rem; 
+            height: 1.5rem; 
+        }
+        .result-item-content .label {
+            font-size: 0.75rem; 
+            color: #6B7280; 
+            margin-bottom: 0.125rem; 
+        }
+        .result-item-content .value {
+            font-size: 1rem; 
+            font-weight: 600;
+            color: #111827; 
+            word-wrap: break-word; 
+        }
+        .good-candidate-text { 
+            color: #059669; 
+            font-weight: bold;
+        }
+        .bad-candidate-text { 
+            color: #DC2626; 
+            font-weight: bold;
+        }
+
+        .info-message {
+            font-size: 0.75rem; 
+            color: #6B7280; 
+            margin-top: 0.25rem; 
+        }
+        .error-message {
+            color: #EF4444; 
+            font-size: 0.875rem; 
+            margin-top: 0.5rem; 
+            padding: 0.5rem;
+            background-color: #FEE2E2; 
+            border: 1px solid #FCA5A5; 
+            border-radius: 0.375rem; 
+        }
+        .details-card {
+            margin-top: 1rem;
+            padding: 1rem;
+            border: 1px solid #D1D5DB; 
+            border-radius: 0.5rem;
+            background-color: #F3F4F6; 
+        }
+        .details-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1F2937; 
+            margin-bottom: 0.75rem;
+        }
+        .details-card ul {
+            list-style-type: disc;
+            margin-left: 1.25rem; 
+            font-size: 0.875rem;
+            color: #4B5563; 
+        }
+        .details-card li {
+            margin-bottom: 0.25rem;
+        }
+        .details-card p {
+            font-size: 0.875rem;
+            color: #4B5563; 
+            margin-bottom: 0.5rem;
+        }
+        .details-card a {
+            color: #4F46E5; 
+            text-decoration: underline;
+        }
+        .details-card a:hover {
+            color: #4338CA; 
+        }
+        .disclaimer {
+            font-size: 0.875rem; 
+            color: #78350f; 
+            margin-top: 1.5rem; 
+            padding: 0.75rem; 
+            background-color: #FEFBEB; 
+            border-radius: 0.375rem; 
+            border: 1px solid #FCD34D; 
+            display: flex; 
+            align-items: flex-start; 
+        }
+        .disclaimer svg {
+            width: 1.25rem; 
+            height: 1.25rem; 
+            margin-right: 0.5rem; 
+            flex-shrink: 0; 
+            color: #D97706; 
+            margin-top: 0.125rem; 
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 to-sky-100 min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="mb-4"> <img src="https://webassets.mongodb.com/_com_assets/cms/mongodb_logo1-76twgcu2dm.png" alt="MongoDB Logo" class="h-10" onerror="this.style.display='none'"> </div>
+
+    <div class="card w-full max-w-xl">
+        <h1 class="text-xl font-bold text-center text-gray-800 mb-4">Compaction Ratio and Savings calculator for Rolling resync requests</h1>
+        <div class="space-y-3">
+            <div>
+                <label for="logicalSize" class="input-label">DB Logical Data Size (w/ System)</label>
+                <input type="number" id="logicalSize" class="input-field" placeholder="e.g., 1000" step="any">
+            </div>
+            <div>
+                <label for="storageSize" class="input-label">DB Storage Size</label>
+                <input type="number" id="storageSize" class="input-field" placeholder="e.g., 500" step="any">
+            </div>
+            <p class="info-message text-center">Use consistent units (e.g., GB, TB) for both inputs.</p>
+        </div>
+
+        <button id="calculateBtn" class="btn-primary w-full mt-4">Calculate</button>
+        
+        <div id="resultsArea" class="results-container hidden">
+            <h2 class="result-title">Calculation Results</h2>
+            
+            <div class="result-item-card split-card">
+                <div class="split-card-section">
+                    <div class="result-item-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                    </div>
+                    <div class="result-item-content">
+                        <div class="label">Ratio of Compaction</div>
+                        <div id="ratioValue" class="value">N/A</div>
+                    </div>
+                </div>
+                <div class="split-card-section">
+                    <div class="result-item-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-7.5 3.75h.008v.008h-.008v-.008Zm0-3.75h.008v.008h-.008V12Zm-2.25 .008h.008v.008H11.25v-.008Zm0 3.75h.008v.008H11.25v-.008Zm0-7.5h.008v.008H11.25V8.25Zm2.25-.008h.008v.008H13.5v-.008Zm0 3.75h.008v.008H13.5v-.008Zm0 3.75h.008v.008H13.5v-.008Z" />
+                        </svg>
+                    </div>
+                    <div class="result-item-content">
+                        <div class="label">Potential Space Savings</div>
+                        <div id="savingsValue" class="value">N/A</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="statusResultCard" class="result-item-card single-item">
+                <div class="result-item-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                </div>
+                <div class="result-item-content">
+                    <div class="label">Candidate Status</div>
+                    <div id="statusValue" class="value">N/A</div>
+                </div>
+            </div>
+            
+            <div class="result-item-card single-item"> 
+                <div class="result-item-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h12A2.25 2.25 0 0 0 20.25 14.25V3m-16.5 0h16.5m-16.5 0H3.75m16.5 0H20.25m0 0A2.25 2.25 0 0 1 18 5.25v9A2.25 2.25 0 0 1 15.75 16.5H6A2.25 2.25 0 0 1 3.75 14.25v-9A2.25 2.25 0 0 1 6 3.75h1.5m0 0h1.5m0 0h1.5m0 0h1.5m0 0h1.5m0 0h1.5m0 0H18m2.25-11.25a2.25 2.25 0 0 0-2.25-2.25H6a2.25 2.25 0 0 0-2.25 2.25m16.5 0Z" />
+                    </svg>
+                </div>
+                <div class="result-item-content w-full"> 
+                    <div class="label mb-1">Compaction Level</div>
+                    <div class="w-full bg-gray-200 rounded-full h-5 relative shadow-inner overflow-hidden" id="visualIndicatorContainer">
+                        <div class="h-full rounded-full" 
+                             style="background: linear-gradient(to right, #ef4444 0%, #facc15 40%, #a3e635 58%, #22c55e 60%, #15803d 100%);">
+                        </div>
+                        <div class="absolute top-0 bottom-0 w-px bg-slate-700 opacity-60" style="left: 60%;"></div>
+                        <div id="ratioMarker" class="absolute top-[-22px] transform -translate-x-1/2 transition-all duration-500 ease-in-out hidden" style="left: 0%;">
+                            <span id="markerText" class="block text-xs font-semibold text-gray-700 bg-white px-1.5 py-0.5 rounded shadow border border-gray-300 whitespace-nowrap">0.00:1</span>
+                            <div class="w-0.5 h-8 bg-gray-700 mx-auto" style="margin-top: -1px;"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-1 px-1">
+                        <span>Uncompact (Good Candidate)</span>
+                        <span>Compact (Bad Candidate)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="errorArea" class="error-message hidden mt-4"></div>
+
+        <div class="mt-4 text-center">
+            <button id="toggleDetailsBtn" class="btn-secondary text-sm">
+                Learn More About The Calculations
+            </button>
+        </div>
+
+        <div id="detailsCard" class="details-card hidden">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-lg font-semibold text-gray-700">Calculation Logic & Thresholds</h2>
+                <button id="closeDetailsBtn" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+            </div>
+            
+            <h3>1. Ratio of Compaction</h3>
+            <p><code>Ratio = DB Logical Data Size (w/ System) / DB Storage Size</code></p>
+            <p>A higher ratio generally indicates better compaction.</p>
+
+            <h3>2. Candidate Status Thresholds</h3>
+            <ul>
+                <li><strong>Excellent candidate:</strong> Logical size is 0 (and storage > 0) OR Ratio &lt; 1.5:1</li>
+                <li><strong>Very good candidate:</strong> 1.5:1 &le; Ratio &lt; 2:1</li>
+                <li><strong>Good candidate:</strong> 2:1 &le; Ratio &lt; 2.75:1</li>
+                <li><strong>Fair candidate:</strong> 2.75:1 &le; Ratio &lt; 3:1</li>
+                <li><strong>Marginal candidate:</strong> 3:1 &le; Ratio &lt; 3.25:1 (Data is reasonably compact)</li>
+                <li><strong>Poor candidate:</strong> Ratio &ge; 3.25:1 (Data is very compact)</li>
+            </ul>
+            
+            <h3>3. Potential Space Savings</h3>
+            <p>Calculated if the candidate is "Good" or "Fair" (Ratio &lt; 3:1):</p>
+            <p><code>Savings = Current DB Storage Size - (DB Logical Data Size / 3)</code></p>
+            <p>This estimates savings if compacted to an ideal 3:1 ratio.</p>
+
+            <h3 class="mt-4">Source</h3>
+            <p>
+                <a href="https://wiki.corp.mongodb.com/spaces/cs/pages/250098673/Rolling+Resync+Request+Process" target="_blank" rel="noopener noreferrer">Rolling Resync Request Process Wiki</a>
+            </p>
+        </div>
+
+        <div class="text-right text-xs text-gray-400 mt-3 pr-1">
+            Version 1.0
+        </div>
+
+        <div class="disclaimer">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+            </svg>
+            <div>
+                <strong class="font-semibold text-amber-700">Disclaimer:</strong> This calculator provides a high-level guideline based on WiredTiger's 3:1 compaction rule-of-thumb. The results are for estimation purposes only. It is crucial to conduct thorough investigations and review all relevant database metrics before making any operational decisions or concluding on compaction needs.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const logicalSizeInput = document.getElementById('logicalSize');
+        const storageSizeInput = document.getElementById('storageSize');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultsArea = document.getElementById('resultsArea');
+        
+        const ratioValueEl = document.getElementById('ratioValue');
+        const statusValueEl = document.getElementById('statusValue');
+        const savingsValueEl = document.getElementById('savingsValue');
+
+        const errorArea = document.getElementById('errorArea');
+        const ratioMarker = document.getElementById('ratioMarker');
+        const markerText = document.getElementById('markerText');
+
+        const toggleDetailsBtn = document.getElementById('toggleDetailsBtn');
+        const detailsCard = document.getElementById('detailsCard');
+        const closeDetailsBtn = document.getElementById('closeDetailsBtn');
+
+        const maxRatioForVisualScale = 5; 
+
+        calculateBtn.addEventListener('click', () => {
+            errorArea.classList.add('hidden');
+            errorArea.textContent = '';
+            resultsArea.classList.add('hidden'); 
+            ratioMarker.classList.add('hidden'); 
+
+            ratioValueEl.textContent = 'N/A';
+            statusValueEl.textContent = 'N/A';
+            statusValueEl.className = 'value'; 
+            savingsValueEl.textContent = 'N/A';
+
+
+            const logicalSize = parseFloat(logicalSizeInput.value);
+            const storageSize = parseFloat(storageSizeInput.value);
+
+            if (isNaN(logicalSize) || isNaN(storageSize)) {
+                showError("Please enter valid numbers for both sizes.");
+                return;
+            }
+            if (logicalSize < 0 || storageSize < 0) {
+                showError("Sizes cannot be negative.");
+                return;
+            }
+            if (storageSize === 0) {
+                if (logicalSize > 0) {
+                    showError("DB Storage Size cannot be zero if Logical Size is greater than zero (causes division by zero).");
+                } else { 
+                    resultsArea.classList.remove('hidden');
+                }
+                return;
+            }
+            
+            let ratio = 0; 
+            if (logicalSize === 0 && storageSize > 0) {
+                ratio = 0; 
+            } else {
+                ratio = logicalSize / storageSize;
+            }
+            
+            let descriptiveStatusText = ""; 
+            let statusHighlightClass = ""; 
+            let coreStatus = ""; 
+            let savingsMessageText = "Not applicable."; 
+
+            if (logicalSize === 0 && storageSize > 0) {
+                coreStatus = "Excellent Candidate";
+                descriptiveStatusText = ", the logical size is zero, indicating empty or highly compressible data.";
+                statusHighlightClass = "good-candidate-text";
+                const idealStorage = 0;
+                const potentialSavings = storageSize - idealStorage;
+                savingsMessageText = `${potentialSavings.toFixed(2)} units. (Current storage could theoretically be reduced to 0).`;
+            } else if (ratio < 1.5) {
+                coreStatus = "Excellent Candidate";
+                descriptiveStatusText = ", the data is highly uncompact.";
+                statusHighlightClass = "good-candidate-text";
+            } else if (ratio < 2) { 
+                coreStatus = "Very Good Candidate";
+                descriptiveStatusText = ", the data is quite uncompact.";
+                statusHighlightClass = "good-candidate-text";
+            } else if (ratio < 2.75) {
+                coreStatus = "Good Candidate";
+                descriptiveStatusText = ", the data could be more compact.";
+                statusHighlightClass = "good-candidate-text";
+            } else if (ratio < 3) {
+                coreStatus = "Fair Candidate";
+                descriptiveStatusText = ", the data is approaching ideal compaction.";
+                statusHighlightClass = "good-candidate-text";
+            } else if (ratio < 3.25) {
+                coreStatus = "Marginal Candidate";
+                descriptiveStatusText = ", the data is reasonably compact.";
+                statusHighlightClass = "bad-candidate-text";
+            } else { 
+                coreStatus = "Poor Candidate";
+                descriptiveStatusText = ", the data is very compact.";
+                statusHighlightClass = "bad-candidate-text";
+            }
+
+            const fullStatusMessage = `<span class="${statusHighlightClass}">${coreStatus}</span>${descriptiveStatusText}`; 
+
+            if (ratio < 3 && !(logicalSize === 0 && storageSize > 0)) {
+                const idealStorageAfterCompaction = logicalSize / 3;
+                const potentialSavings = storageSize - idealStorageAfterCompaction;
+                if (potentialSavings > 0) {
+                    savingsMessageText = `${potentialSavings.toFixed(2)} units.`;
+                } else {
+                    savingsMessageText = `Minimal or no significant savings (${potentialSavings.toFixed(2)} units).`;
+                }
+            } else if (ratio >= 3 && !(logicalSize === 0 && storageSize > 0)) {
+                 savingsMessageText = "Not applicable as the data is already considered compact.";
+            }
+
+            let markerPositionPercentage = Math.min((ratio / maxRatioForVisualScale) * 100, 100);
+            markerPositionPercentage = Math.max(markerPositionPercentage, 0); 
+
+            ratioMarker.style.left = `${markerPositionPercentage}%`;
+            markerText.textContent = `${ratio.toFixed(2)}:1`;
+            ratioMarker.classList.remove('hidden'); 
+            
+            ratioValueEl.textContent = `${ratio.toFixed(2)}:1`;
+            statusValueEl.innerHTML = fullStatusMessage; 
+            savingsValueEl.textContent = savingsMessageText;
+            
+            resultsArea.classList.remove('hidden');
+        });
+
+        toggleDetailsBtn.addEventListener('click', () => {
+            detailsCard.classList.toggle('hidden');
+            toggleDetailsBtn.textContent = detailsCard.classList.contains('hidden') ? 
+                'Learn More About The Calculations' : 'Hide Details';
+        });
+
+        closeDetailsBtn.addEventListener('click', () => {
+            detailsCard.classList.add('hidden');
+            toggleDetailsBtn.textContent = 'Learn More About The Calculations';
+        });
+
+        function showError(message) {
+            errorArea.textContent = message;
+            errorArea.classList.remove('hidden');
+            resultsArea.classList.add('hidden'); 
+            ratioMarker.classList.add('hidden'); 
+        }
+
+        logicalSizeInput.addEventListener('input', clearErrorOnChange);
+        storageSizeInput.addEventListener('input', clearErrorOnChange);
+
+        function clearErrorOnChange() {
+            if (!errorArea.classList.contains('hidden')) {
+                errorArea.classList.add('hidden');
+                errorArea.textContent = '';
+                ratioMarker.classList.add('hidden'); 
+            }
+        }
+    </script>
+
+</body>
+</html>
