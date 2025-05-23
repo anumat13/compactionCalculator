@@ -89,7 +89,7 @@
             display: flex;
             flex-direction: row;
             justify-content: space-around; 
-            align-items: stretch; 
+            align-items: center; 
         }
         .split-card-section {
             width: 48%; 
@@ -125,22 +125,35 @@
             color: #6B7280; 
             margin-bottom: 0.125rem; 
         }
-        .result-item-content .value {
+        .result-item-content .value { /* Default value color */
             font-size: 1rem; 
             font-weight: 600;
-            color: #111827; 
+            color: #111827; /* Default to black/dark gray */
             word-wrap: break-word; 
         }
-        .good-candidate-text { 
-            color: #059669; 
+        #ratioValue { /* Specific styles for ratio value, color will be overridden by .ratio-uncompact/.ratio-compact */
+            font-size: 1.75rem; 
+            font-weight: 700; 
+            line-height: 1; 
+        }
+        /* Updated color logic for ratio display */
+        #ratioValue.ratio-uncompact { /* Ratio < 3, needs compaction, now shown in Red */
+            color: #DC2626 !important; /* Tailwind red-600 */
+        }
+        #ratioValue.ratio-compact { /* Ratio >= 3, already compact, now shown in Green */
+            color: #16A34A !important; /* Tailwind green-600 */
+        }
+
+        .good-candidate-text { /* For status text: "Excellent Candidate", "Good Candidate" etc. */
+            color: #059669; /* Green */
             font-weight: bold;
         }
-        .bad-candidate-text { 
-            color: #DC2626; 
+        .bad-candidate-text { /* For status text: "Marginal Candidate", "Poor Candidate" etc. */
+            color: #DC2626; /* Red */
             font-weight: bold;
         }
 
-        .info-message {
+        .info-message { 
             font-size: 0.75rem; 
             color: #6B7280; 
             margin-top: 0.25rem; 
@@ -181,11 +194,12 @@
             color: #4B5563; 
             margin-bottom: 0.5rem;
         }
-        .details-card a {
+        .details-card a, .disclaimer a { 
             color: #4F46E5; 
             text-decoration: underline;
+            font-weight: 500; 
         }
-        .details-card a:hover {
+        .details-card a:hover, .disclaimer a:hover { 
             color: #4338CA; 
         }
         .disclaimer {
@@ -210,20 +224,21 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-100 to-sky-100 min-h-screen flex flex-col items-center justify-center p-4">
-    <div class="mb-4"> <img src="https://webassets.mongodb.com/_com_assets/cms/mongodb_logo1-76twgcu2dm.png" alt="MongoDB Logo" class="h-10" onerror="this.style.display='none'"> </div>
+    <div class="mb-4"> 
+        <img src="https://webassets.mongodb.com/_com_assets/cms/mongodb_logo1-76twgcu2dm.png" alt="MongoDB Logo" class="h-10" onerror="this.style.display='none'"> 
+    </div>
 
     <div class="card w-full max-w-xl">
         <h1 class="text-xl font-bold text-center text-gray-800 mb-4">Compaction Ratio and Savings calculator for Rolling resync requests</h1>
         <div class="space-y-3">
             <div>
                 <label for="logicalSize" class="input-label">DB Logical Data Size (w/ System)</label>
-                <input type="number" id="logicalSize" class="input-field" placeholder="e.g., 1000" step="any">
+                <input type="number" id="logicalSize" class="input-field" placeholder="e.g., 1000 GB" step="any"> 
             </div>
             <div>
                 <label for="storageSize" class="input-label">DB Storage Size</label>
-                <input type="number" id="storageSize" class="input-field" placeholder="e.g., 500" step="any">
+                <input type="number" id="storageSize" class="input-field" placeholder="e.g., 500 GB" step="any"> 
             </div>
-            <p class="info-message text-center">Use consistent units (e.g., GB, TB) for both inputs.</p>
         </div>
 
         <button id="calculateBtn" class="btn-primary w-full mt-4">Calculate</button>
@@ -240,8 +255,7 @@
                     </div>
                     <div class="result-item-content">
                         <div class="label">Ratio of Compaction</div>
-                        <div id="ratioValue" class="value">N/A</div>
-                    </div>
+                        <div id="ratioValue" class="value">N/A</div> </div>
                 </div>
                 <div class="split-card-section">
                     <div class="result-item-icon">
@@ -282,7 +296,7 @@
                         </div>
                         <div class="absolute top-0 bottom-0 w-px bg-slate-700 opacity-60" style="left: 60%;"></div>
                         <div id="ratioMarker" class="absolute top-[-22px] transform -translate-x-1/2 transition-all duration-500 ease-in-out hidden" style="left: 0%;">
-                            <span id="markerText" class="block text-xs font-semibold text-gray-700 bg-white px-1.5 py-0.5 rounded shadow border border-gray-300 whitespace-nowrap">0.00:1</span>
+                            <span id="markerText" class="block text-xs font-semibold text-gray-700 bg-white px-1.5 py-0.5 rounded shadow border border-gray-300 whitespace-nowrap">0.00&nbsp;&nbsp;:&nbsp;&nbsp;1</span>
                             <div class="w-0.5 h-8 bg-gray-700 mx-auto" style="margin-top: -1px;"></div>
                         </div>
                     </div>
@@ -342,7 +356,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
             </svg>
             <div>
-                <strong class="font-semibold text-amber-700">Disclaimer:</strong> This calculator provides a high-level guideline based on WiredTiger's 3:1 compaction rule-of-thumb. The results are for estimation purposes only. It is crucial to conduct thorough investigations and review all relevant database metrics before making any operational decisions or concluding on compaction needs.
+                <strong class="font-semibold text-amber-700">Disclaimer:</strong> This calculator provides a high-level guideline based on WiredTiger's 3:1 compaction rule-of-thumb. The results are for estimation purposes only. It is crucial to conduct thorough investigations and review all relevant database metrics before making any operational decisions or concluding on compaction needs. 
+                Refer to the <a href="https://wiki.corp.mongodb.com/spaces/cs/pages/250098673/Rolling+Resync+Request+Process" target="_blank" rel="noopener noreferrer">Rolling Resync Request Process Wiki</a> for more details.
             </div>
         </div>
     </div>
@@ -375,6 +390,7 @@
             ratioMarker.classList.add('hidden'); 
 
             ratioValueEl.textContent = 'N/A';
+            ratioValueEl.classList.remove('ratio-uncompact', 'ratio-compact'); // Clear previous color classes
             statusValueEl.textContent = 'N/A';
             statusValueEl.className = 'value'; 
             savingsValueEl.textContent = 'N/A';
@@ -395,6 +411,7 @@
                 if (logicalSize > 0) {
                     showError("DB Storage Size cannot be zero if Logical Size is greater than zero (causes division by zero).");
                 } else { 
+                    ratioValueEl.classList.remove('ratio-uncompact', 'ratio-compact'); // Ensure N/A is not colored
                     resultsArea.classList.remove('hidden');
                 }
                 return;
@@ -415,34 +432,34 @@
             if (logicalSize === 0 && storageSize > 0) {
                 coreStatus = "Excellent Candidate";
                 descriptiveStatusText = ", the logical size is zero, indicating empty or highly compressible data.";
-                statusHighlightClass = "good-candidate-text";
+                statusHighlightClass = "good-candidate-text"; // Stays green for "Excellent Candidate" status
                 const idealStorage = 0;
                 const potentialSavings = storageSize - idealStorage;
-                savingsMessageText = `${potentialSavings.toFixed(2)} units. (Current storage could theoretically be reduced to 0).`;
+                savingsMessageText = `${potentialSavings.toFixed(2)} GB. (Current storage could theoretically be reduced to 0 GB).`;
             } else if (ratio < 1.5) {
                 coreStatus = "Excellent Candidate";
                 descriptiveStatusText = ", the data is highly uncompact.";
-                statusHighlightClass = "good-candidate-text";
+                statusHighlightClass = "good-candidate-text"; // Stays green for "Excellent Candidate" status
             } else if (ratio < 2) { 
                 coreStatus = "Very Good Candidate";
                 descriptiveStatusText = ", the data is quite uncompact.";
-                statusHighlightClass = "good-candidate-text";
+                statusHighlightClass = "good-candidate-text"; // Stays green
             } else if (ratio < 2.75) {
                 coreStatus = "Good Candidate";
                 descriptiveStatusText = ", the data could be more compact.";
-                statusHighlightClass = "good-candidate-text";
+                statusHighlightClass = "good-candidate-text"; // Stays green
             } else if (ratio < 3) {
                 coreStatus = "Fair Candidate";
                 descriptiveStatusText = ", the data is approaching ideal compaction.";
-                statusHighlightClass = "good-candidate-text";
+                statusHighlightClass = "good-candidate-text"; // Stays green
             } else if (ratio < 3.25) {
                 coreStatus = "Marginal Candidate";
                 descriptiveStatusText = ", the data is reasonably compact.";
-                statusHighlightClass = "bad-candidate-text";
+                statusHighlightClass = "bad-candidate-text"; // Stays red for "Marginal Candidate" status
             } else { 
                 coreStatus = "Poor Candidate";
                 descriptiveStatusText = ", the data is very compact.";
-                statusHighlightClass = "bad-candidate-text";
+                statusHighlightClass = "bad-candidate-text"; // Stays red
             }
 
             const fullStatusMessage = `<span class="${statusHighlightClass}">${coreStatus}</span>${descriptiveStatusText}`; 
@@ -451,9 +468,9 @@
                 const idealStorageAfterCompaction = logicalSize / 3;
                 const potentialSavings = storageSize - idealStorageAfterCompaction;
                 if (potentialSavings > 0) {
-                    savingsMessageText = `${potentialSavings.toFixed(2)} units.`;
+                    savingsMessageText = `${potentialSavings.toFixed(2)} GB.`;
                 } else {
-                    savingsMessageText = `Minimal or no significant savings (${potentialSavings.toFixed(2)} units).`;
+                    savingsMessageText = `Minimal or no significant savings (${potentialSavings.toFixed(2)} GB).`;
                 }
             } else if (ratio >= 3 && !(logicalSize === 0 && storageSize > 0)) {
                  savingsMessageText = "Not applicable as the data is already considered compact.";
@@ -462,11 +479,24 @@
             let markerPositionPercentage = Math.min((ratio / maxRatioForVisualScale) * 100, 100);
             markerPositionPercentage = Math.max(markerPositionPercentage, 0); 
 
+            const formattedRatioForMarker = `${ratio.toFixed(2)}&nbsp;&nbsp;:&nbsp;&nbsp;1`;
+            const formattedRatioForDisplay = `${ratio.toFixed(2)} &nbsp;:&nbsp; 1`;
+
             ratioMarker.style.left = `${markerPositionPercentage}%`;
-            markerText.textContent = `${ratio.toFixed(2)}:1`;
+            markerText.innerHTML = formattedRatioForMarker; 
             ratioMarker.classList.remove('hidden'); 
             
-            ratioValueEl.textContent = `${ratio.toFixed(2)}:1`;
+            ratioValueEl.innerHTML = formattedRatioForDisplay; 
+            
+            // Apply REVERSED color coding to ratio value
+            ratioValueEl.classList.remove('ratio-uncompact', 'ratio-compact'); // Clear previous first
+            if (ratio < 3) { // If uncompact (good candidate for compaction), show ratio in RED
+                ratioValueEl.classList.add('ratio-uncompact');
+            } else { // If compact (bad candidate for compaction), show ratio in GREEN
+                ratioValueEl.classList.add('ratio-compact');
+            }
+
+
             statusValueEl.innerHTML = fullStatusMessage; 
             savingsValueEl.textContent = savingsMessageText;
             
@@ -489,6 +519,7 @@
             errorArea.classList.remove('hidden');
             resultsArea.classList.add('hidden'); 
             ratioMarker.classList.add('hidden'); 
+            ratioValueEl.classList.remove('ratio-uncompact', 'ratio-compact'); // Clear color on error
         }
 
         logicalSizeInput.addEventListener('input', clearErrorOnChange);
@@ -499,6 +530,7 @@
                 errorArea.classList.add('hidden');
                 errorArea.textContent = '';
                 ratioMarker.classList.add('hidden'); 
+                ratioValueEl.classList.remove('ratio-uncompact', 'ratio-compact'); 
             }
         }
     </script>
